@@ -4,7 +4,6 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
 def fix_orientation(img):
-    """Fixes the transposed orientation of EMNIST images."""
     return img.permute(0, 2, 1)
 
 def adjust_label(y):
@@ -14,7 +13,7 @@ def adjust_label(y):
 def load_emnist_data(data_dir='./data', batch_size_train=128, batch_size_test=512, use_augmentation=False):
     os.makedirs(data_dir, exist_ok=True)
     
-    # Check if dataset already exists to give the user peace of mind
+    # Check if dataset already exists
     dataset_path = os.path.join(data_dir, 'EMNIST')
     if os.path.exists(dataset_path):
         print(f"📂 Found existing dataset at '{dataset_path}'. Loading locally (skip download)...")
@@ -39,7 +38,7 @@ def load_emnist_data(data_dir='./data', batch_size_train=128, batch_size_test=51
     transform_train = transforms.Compose(transform_list_train)
     transform_test = transforms.Compose(transform_list_test)
 
-    # download=True acts as "download if not present". It is safe to keep it as True.
+    # download=True acts as "download if not present"
     train_data = datasets.EMNIST(
         root=data_dir, split='letters', train=True, 
         download=True, transform=transform_train, target_transform=adjust_label
@@ -49,14 +48,14 @@ def load_emnist_data(data_dir='./data', batch_size_train=128, batch_size_test=51
         download=True, transform=transform_test, target_transform=adjust_label
     )
 
-    # Set num_workers=0 to prevent multiprocessing freezes in Windows/PyQt6 GUIs
+    # Set num_workers to 2 for faster loading, and pin_memory if CUDA is available
     train_loader = DataLoader(
         train_data, batch_size=batch_size_train, shuffle=True, 
-        num_workers=0, pin_memory=torch.cuda.is_available()
+        num_workers=2, pin_memory=torch.cuda.is_available()
     )
     test_loader = DataLoader(
         test_data, batch_size=batch_size_test, shuffle=False, 
-        num_workers=0, pin_memory=torch.cuda.is_available()
+        num_workers=2, pin_memory=torch.cuda.is_available()
     )
 
     alphabet = [chr(i) for i in range(ord('A'), ord('Z') + 1)]

@@ -28,7 +28,7 @@ class DatasetViewerDialog(QDialog):
         if torch.is_tensor(targets):
             targets = targets.numpy()
             
-        # FIX 1: Raw EMNIST targets are 1-26. We must subtract 1 to make them 0-25.
+        # Raw EMNIST targets are 1-26. Must subtract 1 to make them 0-25.
         for idx, label in enumerate(targets):
             adj_label = int(label) - 1
             if 0 <= adj_label < len(self.alphabet):
@@ -132,7 +132,7 @@ class PredictionViewerDialog(QDialog):
             for X, y in temp_loader:
                 X = X.to(self.device)
                 if type(self.model).__name__ == "MultilayerPerceptron":
-                    # FIX 2: Use .reshape instead of .view to handle permuted/non-contiguous tensors
+                    # Use .reshape instead of .view to handle permuted/non-contiguous tensors
                     X = X.reshape(X.size(0), -1)
                 preds = self.model(X).argmax(dim=1).cpu()
                 correct_mask = (preds == y)
@@ -227,7 +227,7 @@ class PredictionViewerDialog(QDialog):
         with torch.no_grad():
             X = img.unsqueeze(0).to(self.device)
             if type(self.model).__name__ == "MultilayerPerceptron":
-                # FIX 2: Use .reshape
+                # Use .reshape instead of .view to handle permuted/non-contiguous tensors
                 X = X.reshape(X.size(0), -1)
             out = self.model(X)
             probs = torch.softmax(out, dim=1).cpu().numpy()[0]

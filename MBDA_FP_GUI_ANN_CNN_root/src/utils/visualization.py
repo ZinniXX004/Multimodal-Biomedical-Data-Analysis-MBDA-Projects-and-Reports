@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.figure import Figure
 
 def plot_dataset_samples(dataset, alphabet, num_classes=26):
-    """Menampilkan 1 grid sample EMNIST dari A-Z (seperti di Jupyter Notebook)."""
+    """Displays 1 sample EMNIST grid from A-Z (as in Jupyter Notebook)."""
     fig = Figure(figsize=(14, 8), dpi=100)
     fig.patch.set_facecolor('#1e1e2e')
     fig.suptitle('Dataset Samples EMNIST Letters (A–Z)', fontsize=16, fontweight='bold', color='#EEEEEE', y=0.98)
@@ -28,7 +28,7 @@ def plot_dataset_samples(dataset, alphabet, num_classes=26):
     return fig
 
 def plot_prediction_inspection(model, test_loader, device, alphabet, n_show=20):
-    """Menampilkan grid hasil tes prediksi (Benar: Hijau, Salah: Merah)."""
+    """Displays grid of prediction results (Correct: Green, Incorrect: Red)."""
     model.eval()
     images_list, labels_list, preds_list, confs_list = [], [], [], []
 

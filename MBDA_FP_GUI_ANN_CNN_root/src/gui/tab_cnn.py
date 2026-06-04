@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import torch
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, 
@@ -23,8 +24,13 @@ class CNNPipelineTab(QWidget):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
         self.model, self.train_loader, self.test_loader = None, None, None
+        
         self.output_dir = "outputs/cnn"
-        os.makedirs(self.output_dir, exist_ok=True)
+        self.ckpt_dir = os.path.join(self.output_dir, "checkpoints")
+        self.logs_dir = os.path.join(self.output_dir, "logs")
+        self.plots_dir = os.path.join(self.output_dir, "plots")
+        for d in [self.ckpt_dir, self.logs_dir, self.plots_dir]:
+            os.makedirs(d, exist_ok=True)
         
         self.header_label = QLabel(f"🖥️ Active Device: <b>{str(self.device).upper()}</b>")
         self.header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -107,13 +113,22 @@ class CNNPipelineTab(QWidget):
             QMessageBox.critical(self, "Error", str(e))
 
     def load_saved_model(self):
-        if self.model is None: return
-        file_path, _ = QFileDialog.getOpenFileName(self, "Select Model", self.output_dir, "PyTorch Models (*.pth)")
+        if self.model is None:
+            QMessageBox.warning(self, "Warning", "Please Build CNN Model first.")
+            return
+            
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Model", self.ckpt_dir, "PyTorch Models (*.pth)")
         if file_path:
-            checkpoint = torch.load(file_path, map_location=self.device)
-            self.model.load_state_dict(checkpoint.get('model_state_dict', checkpoint))
-            self.model.eval()
-            self.status_label.setText(f"Status: 📂 Loaded weights from {os.path.basename(file_path)}")
+            try:
+                checkpoint = torch.load(file_path, map_location=self.device)
+                if 'model_state_dict' in checkpoint:
+                    self.model.load_state_dict(checkpoint['model_state_dict'])
+                else:
+                    self.model.load_state_dict(checkpoint)
+                self.model.eval()
+                self.status_label.setText(f"Status: 📂 Loaded weights from {os.path.basename(file_path)}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error Loading Model", str(e))
 
     def setup_training_tab(self):
         layout = QVBoxLayout(self.tab_training)
@@ -133,6 +148,7 @@ class CNNPipelineTab(QWidget):
         if self.model is None or self.train_loader is None: return
         self.btn_start_train.setEnabled(False)
         self.log_console.clear()
+        self.log_console.append("> root@mbda:~# ./train_cnn.sh\n> Initializing CUDA cores...\n> Starting CNN Training...")
         
         epochs, lr = int(self.epochs_input.text()), float(self.lr_input.text())
         step_sz, gamma_val = int(self.step_size_input.text()), float(self.gamma_input.text())
@@ -142,7 +158,7 @@ class CNNPipelineTab(QWidget):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=1e-4)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_sz, gamma=gamma_val)
         
-        trainer = Trainer(self.model, self.train_loader, self.test_loader, criterion, optimizer, scheduler, self.device, self.output_dir)
+        trainer = Trainer(self.model, self.train_loader, self.test_loader, criterion, optimizer, scheduler, self.device, self.ckpt_dir)
         self.worker = TrainingWorker(trainer, epochs)
         self.worker.batch_update.connect(self.update_batch_log)
         self.worker.epoch_update.connect(self.update_epoch_log)
@@ -159,7 +175,13 @@ class CNNPipelineTab(QWidget):
     def training_finished(self, history, total_time):
         self.btn_start_train.setEnabled(True)
         self.history = history
-        QMessageBox.information(self, "Finished", f"CNN Training completed in {total_time:.1f}s.")
+        self.train_progress.setValue(self.train_progress.maximum())
+        self.log_console.append(f"> CNN Training completed in {total_time:.1f}s.")
+        
+        df_hist = pd.DataFrame(self.history)
+        csv_path = os.path.join(self.logs_dir, 'training_history.csv')
+        df_hist.to_csv(csv_path, index=False)
+        self.log_console.append(f"> Training history successfully exported to: {csv_path}")
 
     def setup_eval_tab(self):
         layout = QVBoxLayout(self.tab_eval)
@@ -213,6 +235,11 @@ class CNNPipelineTab(QWidget):
             self.plot_bars.update_plot()
             self.plot_cm.update_plot()
             self.btn_inspect_preds.setEnabled(True)
+            
+            self.plot_curves.canvas.fig.savefig(os.path.join(self.plots_dir, 'training_curves.png'), dpi=150, bbox_inches='tight')
+            self.plot_bars.canvas.fig.savefig(os.path.join(self.plots_dir, 'per_class_accuracy.png'), dpi=150, bbox_inches='tight')
+            self.plot_cm.canvas.fig.savefig(os.path.join(self.plots_dir, 'confusion_matrix.png'), dpi=150, bbox_inches='tight')
+            
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
         finally:

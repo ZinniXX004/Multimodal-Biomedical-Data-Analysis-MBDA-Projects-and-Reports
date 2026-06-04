@@ -48,7 +48,7 @@ def run_evaluation_and_plot(model, test_loader, device, alphabet, history, figs)
         ax.grid(True, alpha=0.15)
         return ax
 
-    # --- PLOT 1: Training Curves ---
+    # PLOT 1: Training Curves
     fig_curves = figs['curves']
     fig_curves.clf()
     fig_curves.patch.set_facecolor(DARK)
@@ -56,7 +56,7 @@ def run_evaluation_and_plot(model, test_loader, device, alphabet, history, figs)
     ax_loss = style_ax(fig_curves.add_subplot(1, 2, 1))
     ax_acc = style_ax(fig_curves.add_subplot(1, 2, 2))
     
-    # FIX 3: Hide legends if no history exists (prevents UserWarning)
+    # Hide legends if no history exists (prevents UserWarning)
     if len(history['train_loss']) > 1:
         epochs_range = range(1, len(history['train_loss']) + 1)
         ax_loss.plot(epochs_range, history['train_loss'], 'o-', color=BLUE, lw=2, ms=4, label='Train Loss')
@@ -78,7 +78,7 @@ def run_evaluation_and_plot(model, test_loader, device, alphabet, history, figs)
     
     fig_curves.tight_layout()
 
-    # --- PLOT 2: Per-Class Bar Chart ---
+    # PLOT 2: Per-Class Bar Chart
     fig_bars = figs['bars']
     fig_bars.clf()
     fig_bars.patch.set_facecolor(DARK)
@@ -94,7 +94,7 @@ def run_evaluation_and_plot(model, test_loader, device, alphabet, history, figs)
     ax_bars.legend(labelcolor=WHITE, facecolor=PANEL)
     fig_bars.tight_layout()
 
-    # --- PLOT 3: Confusion Matrix ---
+    # PLOT 3: Confusion Matrix
     fig_cm = figs['cm']
     fig_cm.clf()
     fig_cm.patch.set_facecolor(DARK)

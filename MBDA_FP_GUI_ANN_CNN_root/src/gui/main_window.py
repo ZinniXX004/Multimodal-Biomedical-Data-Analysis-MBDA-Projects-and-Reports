@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         
         # Window properties
-        self.setWindowTitle("🧠 MBDA Final Projects Dashboard (ANN & CNN)")
+        self.setWindowTitle("🧠 MBDA Final Projects Dashboard (ANN and CNN)")
         self.setGeometry(50, 50, 1300, 850) # Spacious size to fit Matplotlib dashboards
         
         # Main Tab Widget

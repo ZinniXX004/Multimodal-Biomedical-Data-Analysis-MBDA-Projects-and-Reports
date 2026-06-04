@@ -5,7 +5,6 @@ import torch.nn.functional as F
 class MultilayerPerceptron(nn.Module):
     """
     4-layer ANN for classification EMNIST Letters (26 classes)
-    Restored exactly to match Jupyter Notebook state_dict keys.
     """
     def __init__(self, in_sz=784, out_sz=26, layers=[512, 256, 128]):
         super().__init__()

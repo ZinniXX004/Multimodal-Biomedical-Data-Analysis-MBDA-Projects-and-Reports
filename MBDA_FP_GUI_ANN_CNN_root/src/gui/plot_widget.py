@@ -21,7 +21,7 @@ class PlotWidget(QWidget):
         
         self.canvas = MplCanvas(self, width=width, height=height)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        self.toolbar.setStyleSheet("background-color: #EEEEEE; border-radius: 3px;")
+        self.toolbar.setStyleSheet("background-color: #2a2a3e; border: 1px solid #444; border-radius: 4px;")
         
         self.layout.addWidget(self.toolbar)
         self.layout.addWidget(self.canvas)
@@ -30,7 +30,6 @@ class PlotWidget(QWidget):
         self.canvas.draw()
 
 class PlotDialog(QDialog):
-    """Pop-up dialog untuk menampilkan visualisasi ekstra (Dataset & Prediksi)."""
     def __init__(self, fig, title="Data Visualization", parent=None):
         super().__init__(parent)
         self.setWindowTitle(title)
@@ -40,7 +39,7 @@ class PlotDialog(QDialog):
         layout = QVBoxLayout(self)
         canvas = FigureCanvas(fig)
         toolbar = NavigationToolbar(canvas, self)
-        toolbar.setStyleSheet("background-color: #EEEEEE; border-radius: 3px;")
+        toolbar.setStyleSheet("background-color: #2a2a3e; border: 1px solid #444; border-radius: 4px;")
         
         layout.addWidget(toolbar)
         layout.addWidget(canvas)
