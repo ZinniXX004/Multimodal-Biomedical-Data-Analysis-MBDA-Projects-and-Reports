@@ -1,0 +1,9 @@
+# Ignore the inner git repository folder
+/Folder MBDA Pak Tri/
+
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment variables
+.env
