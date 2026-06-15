@@ -7,3 +7,15 @@ Thumbs.db
 
 # Ignore environment variables
 .env
+
+# Ignore all zip, rar, and installer files
+*.zip
+*.rar
+*.exe
+
+# Ignore medical imaging data and cache directories
+*Anonymize*/
+Data*/
+Dataset*/
+outputs/
+
